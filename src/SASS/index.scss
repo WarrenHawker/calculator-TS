@@ -1,0 +1,33 @@
+@use 'components' as *;
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;700&display=swap');
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  font-family: 'League Spartan', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 2em;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+
+  main {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    section {
+      border: 1px solid black;
+      padding: 1em;
+      margin-top: 1em;
+      border-radius: 0.5em;
+    }
+  }
+}

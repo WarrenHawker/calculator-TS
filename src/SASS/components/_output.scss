@@ -1,0 +1,19 @@
+.output {
+    text-align: right;
+    height: 100px;
+    display: grid;
+    grid-template-rows: 22px 1fr;
+    gap: 1em;
+
+    .secondary-output {
+        margin: 0;
+        font-weight: 300;
+        font-size: 24px;
+    }
+    .primary-output {
+        margin: 0;
+        font-weight: 700;
+        font-size: 40px;
+        grid-row: 2/ 3;
+    }
+}
