@@ -15,12 +15,15 @@ function App() {
   const [result, setResult] = useState('');
   const [operator, setOperator] = useState('');
   const [currentInput, setCurrentInput] = useState<string | number>('');
+  const [previousInput, setPreviousInput] = useState<string | number>('');
 
   console.log('first number: ', firstNumber);
   console.log('second number: ', secondNumber);
   console.log('operator: ', operator);
   console.log('result: ', result);
-  console.log('input: ', currentInput);
+  console.log('current input: ', currentInput);
+  console.log('previous input: ', previousInput);
+  console.log('-----------------');
 
   const runCalculation = (): string => {
     let newResult: number = 0;
@@ -44,49 +47,63 @@ function App() {
     return newResult.toString();
   };
 
-  const pressKey = async (input: string | number) => {
+  const pressKey = (input: string | number) => {
+    setPreviousInput(currentInput);
     setCurrentInput(input);
 
     //number first input
-    if (typeof input == 'number' && !secondNumber && !operator && !result) {
-      setFirstNumber((prevNumber) => (prevNumber += input.toString()));
+    if (!firstNumber && typeof input == 'number') {
+      setFirstNumber(input.toString());
+    }
+
+    //additional numbers before operator
+    if (
+      typeof currentInput == 'number' &&
+      typeof input == 'number' &&
+      !secondNumber
+    ) {
+      setFirstNumber((prevNumber) => (prevNumber += input));
     }
 
     //number after operator
-    if (typeof input == 'number' && operator && !result) {
-      setSecondNumber((prevNumber) => (prevNumber += input.toString()));
+    if (checkOperator(currentInput.toString()) && typeof input == 'number') {
+      setSecondNumber(input.toString());
     }
 
-    //number after equals
-    if (typeof input == 'number' && result) {
-      setFirstNumber(input.toString());
-      setResult('');
-      setOperator('');
-      setSecondNumber('');
-    }
-
-    //operator first input
-
-    //operator after first number
+    //additional numbers after operator
     if (
-      checkOperator(input.toString()) &&
-      firstNumber &&
-      !secondNumber &&
-      !result
+      typeof currentInput == 'number' &&
+      typeof input == 'number' &&
+      secondNumber
     ) {
+      setSecondNumber((prevNumber) => (prevNumber += input));
+    }
+    //operator first input
+    if (!currentInput && checkOperator(input.toString())) {
+      setFirstNumber('0');
+      setOperator(input.toString());
+    }
+    //operator after first number
+    if (typeof currentInput == 'number' && checkOperator(input.toString())) {
       setOperator(input.toString());
     }
     //operator after second number
-    if (checkOperator(input.toString()) && secondNumber) {
+    if (checkOperator(input.toString()) && firstNumber && secondNumber) {
       setFirstNumber(runCalculation());
-      setSecondNumber('');
       setOperator(input.toString());
+      setSecondNumber('');
     }
-
     //operator after equals
-
+    if (checkOperator(input.toString()) && currentInput == '=') {
+      setOperator(input.toString());
+      setFirstNumber(result);
+    }
+    //equals
     if (input == '=') {
       runCalculation();
+      setFirstNumber('');
+      setSecondNumber('');
+      setOperator('');
     }
 
     if (input == 'reset') {
@@ -95,27 +112,12 @@ function App() {
       setOperator('');
       setResult('');
     }
-
-    if (input == 'del' && result) {
-      return;
-    }
-
-    if (input == 'del' && !operator) {
-      setFirstNumber((prevNumber) => {
-        return prevNumber.substring(0, prevNumber.length - 1);
-      });
-    }
-
-    if (input == 'del' && operator) {
-      setSecondNumber((prevNumber) => {
-        return prevNumber.substring(0, prevNumber.length - 1);
-      });
-    }
   };
   return (
     <div className='app-container'>
       <main>
         <Output
+          previousInput={previousInput}
           currentInput={currentInput}
           firstNumber={firstNumber}
           secondNumber={secondNumber}
