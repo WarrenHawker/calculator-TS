@@ -17,14 +17,6 @@ function App() {
   const [currentInput, setCurrentInput] = useState<string | number>('');
   const [previousInput, setPreviousInput] = useState<string | number>('');
 
-  console.log('first number: ', firstNumber);
-  console.log('second number: ', secondNumber);
-  console.log('operator: ', operator);
-  console.log('result: ', result);
-  console.log('current input: ', currentInput);
-  console.log('previous input: ', previousInput);
-  console.log('-----------------');
-
   const runCalculation = (): string => {
     let newResult: number = 0;
     switch (operator) {
@@ -99,7 +91,7 @@ function App() {
     }
 
     //number first input
-    if (!previousInput && typeof input == 'number') {
+    if (!currentInput && typeof input == 'number') {
       setFirstNumber(input.toString());
       setSecondNumber('');
       setOperator('');
@@ -177,6 +169,41 @@ function App() {
     //first number after reset
     if (typeof input == 'number' && currentInput == 'reset') {
       setFirstNumber(input.toString());
+    }
+
+    //del first input or after reset or equals
+    if (
+      input == 'del' &&
+      (currentInput == 'reset' || currentInput == '=' || !currentInput)
+    ) {
+      return;
+    }
+    //del on first number
+    if (input == 'del' && !operator) {
+      if (firstNumber.length < 2) {
+        setFirstNumber('0');
+      } else {
+        setFirstNumber((prevNumber) => prevNumber.slice(0, -1));
+      }
+    }
+
+    //del on second number
+    if (input == 'del' && operator) {
+      if (secondNumber.length < 2) {
+        setSecondNumber('0');
+      } else {
+        setSecondNumber((prevNumber) => prevNumber.slice(0, -1));
+      }
+    }
+
+    //first number after del
+    if (typeof input == 'number' && currentInput == 'del' && !operator) {
+      setFirstNumber((prevNumber) => (prevNumber += input));
+    }
+
+    //second number after del
+    if (typeof input == 'number' && currentInput == 'del' && operator) {
+      setSecondNumber((prevNumber) => (prevNumber += input));
     }
   };
   return (

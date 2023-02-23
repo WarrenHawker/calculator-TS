@@ -14,18 +14,6 @@ const Output = (props: OutputProps) => {
   const [primaryOutput, setPrimaryOutput] = useState('0');
   const [secondaryOutput, setSecondaryOutput] = useState('');
 
-  // console.log(
-  //   'output currentInput: ',
-  //   props.currentInput,
-  //   typeof props.currentInput
-  // );
-  // console.log(
-  //   'output previousInput: ',
-  //   props.previousInput,
-  //   typeof props.previousInput
-  // );
-  // console.log('---------------------');
-
   useEffect(() => {
     //dot first input
     if (!props.previousInput && props.currentInput == '.') {
@@ -33,18 +21,44 @@ const Output = (props: OutputProps) => {
       setSecondaryOutput('');
     }
     //dot after first number
-    if (typeof props.previousInput == 'number' && props.currentInput == '.') {
+    if (
+      !props.operator &&
+      typeof props.previousInput == 'number' &&
+      props.currentInput == '.'
+    ) {
       setPrimaryOutput(props.firstNumber);
       setSecondaryOutput('');
     }
 
     //dot after second number
+    if (
+      props.operator &&
+      typeof props.previousInput == 'number' &&
+      props.currentInput == '.'
+    ) {
+      setPrimaryOutput(props.secondNumber);
+      setSecondaryOutput(`${props.firstNumber} ${props.operator}`);
+    }
 
     //dot after operator
-
+    if (
+      checkOperator(props.previousInput.toString()) &&
+      props.currentInput == '.'
+    ) {
+      setPrimaryOutput('0.');
+      setSecondaryOutput(`${props.firstNumber} ${props.operator}`);
+    }
     //dot after reset
+    if (props.currentInput == '.' && props.previousInput == 'reset') {
+      setPrimaryOutput('0.');
+      setSecondaryOutput('');
+    }
 
     //dot after equals
+    if (props.currentInput == '.' && props.previousInput == '=') {
+      setPrimaryOutput('0.');
+      setSecondaryOutput('');
+    }
 
     //first number after dot
     if (
@@ -57,9 +71,13 @@ const Output = (props: OutputProps) => {
     }
 
     //second number after dot
-    if (typeof props.currentInput == 'number' && props.previousInput == '.') {
-      setPrimaryOutput(props.firstNumber);
-      setSecondaryOutput('');
+    if (
+      typeof props.currentInput == 'number' &&
+      props.previousInput == '.' &&
+      props.operator
+    ) {
+      setPrimaryOutput(props.secondNumber);
+      setSecondaryOutput(`${props.firstNumber} ${props.operator}`);
     }
     //number first input
     if (!props.previousInput && typeof props.currentInput == 'number') {
@@ -153,6 +171,38 @@ const Output = (props: OutputProps) => {
     ) {
       setPrimaryOutput(props.firstNumber);
       setSecondaryOutput('');
+    }
+
+    //del on first number
+    if (props.currentInput == 'del' && !props.operator) {
+      setPrimaryOutput(props.firstNumber);
+      setSecondaryOutput('');
+    }
+
+    //del on second number
+    if (props.currentInput == 'del' && props.operator) {
+      setPrimaryOutput(props.secondNumber);
+      setSecondaryOutput(`${props.firstNumber} ${props.operator}`);
+    }
+
+    //first number after del
+    if (
+      typeof props.currentInput == 'number' &&
+      props.previousInput == 'del' &&
+      !props.operator
+    ) {
+      setPrimaryOutput(props.firstNumber);
+      setSecondaryOutput('');
+    }
+
+    //second number after del
+    if (
+      typeof props.currentInput == 'number' &&
+      props.previousInput == 'del' &&
+      props.operator
+    ) {
+      setPrimaryOutput(props.secondNumber);
+      setSecondaryOutput(`${props.firstNumber} ${props.operator}`);
     }
   }, [props]);
 
