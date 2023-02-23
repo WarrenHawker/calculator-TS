@@ -51,9 +51,65 @@ function App() {
     setPreviousInput(currentInput);
     setCurrentInput(input);
 
+    //dot first input
+    if (!currentInput && input == '.') {
+      setFirstNumber('0.');
+    }
+    //dot after first number
+    if (typeof currentInput == 'number' && input == '.' && !operator) {
+      if (firstNumber.includes('.')) {
+        return;
+      } else {
+        setFirstNumber((prevNumber) => (prevNumber += input.toString()));
+      }
+    }
+
+    //dot after second number
+    if (typeof currentInput == 'number' && input == '.' && operator) {
+      if (secondNumber.includes('.')) {
+        return;
+      } else {
+        setSecondNumber((prevNumber) => (prevNumber += input.toString()));
+      }
+    }
+
+    //dot after operator
+    if (checkOperator(currentInput.toString()) && input == '.') {
+      setSecondNumber('0.');
+    }
+
+    //dot after reset
+    if (currentInput == 'reset' && input == '.') {
+      setFirstNumber('0.');
+    }
+
+    //dot after equals
+    if (currentInput == '=' && input == '.') {
+      setFirstNumber('0.');
+    }
+
+    //first number after dot
+    if (currentInput == '.' && typeof input == 'number' && !operator) {
+      setFirstNumber((prevNumber) => (prevNumber += input.toString()));
+    }
+
+    //second number after dot
+    if (currentInput == '.' && typeof input == 'number' && operator) {
+      setSecondNumber((prevNumber) => (prevNumber += input.toString()));
+    }
+
     //number first input
-    if (!firstNumber && typeof input == 'number') {
+    if (!previousInput && typeof input == 'number') {
       setFirstNumber(input.toString());
+      setSecondNumber('');
+      setOperator('');
+    }
+
+    //number after equals
+    if (currentInput == '=' && typeof input == 'number') {
+      setFirstNumber(input.toString());
+      setSecondNumber('');
+      setOperator('');
     }
 
     //additional numbers before operator
@@ -98,19 +154,29 @@ function App() {
       setOperator(input.toString());
       setFirstNumber(result);
     }
+
+    //operator after operator
+    if (
+      checkOperator(input.toString()) &&
+      checkOperator(currentInput.toString())
+    ) {
+      setOperator(input.toString());
+    }
     //equals
     if (input == '=') {
       runCalculation();
-      setFirstNumber('');
-      setSecondNumber('');
-      setOperator('');
     }
-
+    //reset
     if (input == 'reset') {
       setFirstNumber('');
       setSecondNumber('');
       setOperator('');
       setResult('');
+    }
+
+    //first number after reset
+    if (typeof input == 'number' && currentInput == 'reset') {
+      setFirstNumber(input.toString());
     }
   };
   return (
