@@ -10,214 +10,216 @@ export const checkOperator = (input: string) => {
 };
 
 function App() {
-  const [firstNumber, setFirstNumber] = useState('');
-  const [secondNumber, setSecondNumber] = useState('');
-  const [result, setResult] = useState('');
-  const [operator, setOperator] = useState('');
-  const [currentInput, setCurrentInput] = useState<string | number>('');
-  const [previousInput, setPreviousInput] = useState<string | number>('');
+  const [prevInput, setPrevInput] = useState<string>('');
+  const [calcs, setCalcs] = useState([
+    //display is either "primary", "secondary", "none" or "both"
+    {
+      name: 'firstNumber',
+      value: '0',
+      display: 'primary',
+      activeChange: true,
+    },
+    {
+      name: 'secondNumber',
+      value: '',
+      display: 'none',
+      activeChange: false,
+    },
+    {
+      name: 'operator',
+      value: '',
+      display: 'none',
+    },
+    {
+      name: 'result',
+      value: '',
+      display: 'none',
+    },
+  ]);
+
+  console.log(calcs);
 
   const runCalculation = (): string => {
     let newResult: number = 0;
-    switch (operator) {
+    switch (calcs[2].value) {
       case '+':
-        newResult = parseFloat(firstNumber) + parseFloat(secondNumber);
+        newResult = parseFloat(calcs[0].value) + parseFloat(calcs[1].value);
         break;
       case '-':
-        newResult = parseFloat(firstNumber) - parseFloat(secondNumber);
+        newResult = parseFloat(calcs[0].value) - parseFloat(calcs[1].value);
         break;
       case '/':
-        newResult = parseFloat(firstNumber) / parseFloat(secondNumber);
+        newResult = parseFloat(calcs[0].value) / parseFloat(calcs[1].value);
         break;
       case 'x':
-        newResult = parseFloat(firstNumber) * parseFloat(secondNumber);
+        newResult = parseFloat(calcs[0].value) * parseFloat(calcs[1].value);
         break;
       default:
         return '';
     }
-    setResult(newResult.toString());
     return newResult.toString();
   };
 
-  const pressKey = (input: string | number) => {
-    setPreviousInput(currentInput);
-    setCurrentInput(input);
+  const inputNum = (input: string, prevInput: string) => {
+    if (prevInput == '=') {
+      setCalcs([
+        {
+          name: 'firstNumber',
+          value: input,
+          display: 'primary',
+          activeChange: true,
+        },
+        {
+          name: 'secondNumber',
+          value: '',
+          display: 'none',
+          activeChange: false,
+        },
+        {
+          name: 'operator',
+          value: '',
+          display: 'none',
+        },
+        {
+          name: 'result',
+          value: '',
+          display: 'none',
+        },
+      ]);
+    } else {
+      setCalcs((prevCalcs) => {
+        return prevCalcs.map((item) => {
+          let newValue = '';
+          if (item.activeChange) {
+            if (item.value == '0' || '') {
+              newValue = input;
+            } else newValue = item.value += input;
+            return { ...item, value: newValue };
+          } else return { ...item };
+        });
+      });
+    }
+  };
 
-    //dot first input
-    if (!currentInput && input == '.') {
-      setFirstNumber('0.');
+  const inputOperator = (input: string, prevInput: string) => {
+    if (prevInput == '=') {
+      setCalcs([
+        {
+          name: 'firstNumber',
+          value: calcs[3].value,
+          display: 'both',
+          activeChange: false,
+        },
+        {
+          name: 'secondNumber',
+          value: '',
+          display: 'none',
+          activeChange: true,
+        },
+        {
+          name: 'operator',
+          value: input,
+          display: 'secondary',
+        },
+        {
+          name: 'result',
+          value: '',
+          display: 'none',
+        },
+      ]);
+    } else {
+      setCalcs((prevCalcs) => {
+        return prevCalcs.map((item) => {
+          if (item.name == 'operator') {
+            return { ...item, value: input, display: 'secondary' };
+          } else if (item.name == 'firstNumber') {
+            return { ...item, activeChange: false, display: 'both' };
+          } else if (item.name == 'secondNumber') {
+            return { ...item, activeChange: true, display: 'primary' };
+          } else return { ...item };
+        });
+      });
     }
-    //dot after first number
-    if (typeof currentInput == 'number' && input == '.' && !operator) {
-      if (firstNumber.includes('.')) {
-        return;
-      } else {
-        setFirstNumber((prevNumber) => (prevNumber += input.toString()));
-      }
-    }
+  };
 
-    //dot after second number
-    if (typeof currentInput == 'number' && input == '.' && operator) {
-      if (secondNumber.includes('.')) {
-        return;
-      } else {
-        setSecondNumber((prevNumber) => (prevNumber += input.toString()));
-      }
-    }
-
-    //dot after operator
-    if (checkOperator(currentInput.toString()) && input == '.') {
-      setSecondNumber('0.');
-    }
-
-    //dot after reset
-    if (currentInput == 'reset' && input == '.') {
-      setFirstNumber('0.');
-    }
-
-    //dot after equals
-    if (currentInput == '=' && input == '.') {
-      setFirstNumber('0.');
-    }
-
-    //first number after dot
-    if (currentInput == '.' && typeof input == 'number' && !operator) {
-      setFirstNumber((prevNumber) => (prevNumber += input.toString()));
-    }
-
-    //second number after dot
-    if (currentInput == '.' && typeof input == 'number' && operator) {
-      setSecondNumber((prevNumber) => (prevNumber += input.toString()));
-    }
-
-    //number first input
-    if (!currentInput && typeof input == 'number') {
-      setFirstNumber(input.toString());
-      setSecondNumber('');
-      setOperator('');
-    }
-
-    //number after equals
-    if (currentInput == '=' && typeof input == 'number') {
-      setFirstNumber(input.toString());
-      setSecondNumber('');
-      setOperator('');
-    }
-
-    //additional numbers before operator
-    if (
-      typeof currentInput == 'number' &&
-      typeof input == 'number' &&
-      !secondNumber
-    ) {
-      setFirstNumber((prevNumber) => (prevNumber += input));
-    }
-
-    //number after operator
-    if (checkOperator(currentInput.toString()) && typeof input == 'number') {
-      setSecondNumber(input.toString());
-    }
-
-    //additional numbers after operator
-    if (
-      typeof currentInput == 'number' &&
-      typeof input == 'number' &&
-      secondNumber
-    ) {
-      setSecondNumber((prevNumber) => (prevNumber += input));
-    }
-    //operator first input
-    if (!currentInput && checkOperator(input.toString())) {
-      setFirstNumber('0');
-      setOperator(input.toString());
-    }
-    //operator after first number
-    if (typeof currentInput == 'number' && checkOperator(input.toString())) {
-      setOperator(input.toString());
-    }
-    //operator after second number
-    if (checkOperator(input.toString()) && firstNumber && secondNumber) {
-      setFirstNumber(runCalculation());
-      setOperator(input.toString());
-      setSecondNumber('');
-    }
-    //operator after equals
-    if (checkOperator(input.toString()) && currentInput == '=') {
-      setOperator(input.toString());
-      setFirstNumber(result);
-    }
-
-    //operator after operator
-    if (
-      checkOperator(input.toString()) &&
-      checkOperator(currentInput.toString())
-    ) {
-      setOperator(input.toString());
-    }
-    //equals
+  const inputUtil = (input: string, prevInput: string) => {
     if (input == '=') {
-      runCalculation();
+      setCalcs((prevCalcs) => {
+        return prevCalcs.map((item) => {
+          if (item.name == 'result') {
+            return { ...item, value: runCalculation(), display: 'primary' };
+          } else return { ...item, display: 'secondary' };
+        });
+      });
     }
-    //reset
     if (input == 'reset') {
-      setFirstNumber('');
-      setSecondNumber('');
-      setOperator('');
-      setResult('');
+      setCalcs([
+        {
+          name: 'firstNumber',
+          value: '0',
+          display: 'primary',
+          activeChange: true,
+        },
+        {
+          name: 'secondNumber',
+          value: '',
+          display: 'none',
+          activeChange: false,
+        },
+        {
+          name: 'operator',
+          value: '',
+          display: 'none',
+        },
+        {
+          name: 'result',
+          value: '',
+          display: 'none',
+        },
+      ]);
     }
+    if (input == 'del') {
+      setCalcs((prevCalcs) => {
+        return prevCalcs.map((item) => {
+          let newValue = '';
+          if (item.activeChange) {
+            if (item.value.length < 2) {
+              newValue = '0';
+            } else newValue = item.value.substring(0, item.value.length - 1);
+            return { ...item, value: newValue };
+          } else return { ...item };
+        });
+      });
+    }
+    if (input == '.') {
+      setCalcs((prevCalcs) => {
+        return prevCalcs.map((item) => {
+          if (item.activeChange) {
+            if (item.value.includes('.')) {
+              return { ...item };
+            }
+            let newValue = (item.value += input);
+            return { ...item, value: newValue };
+          } else return { ...item };
+        });
+      });
+    }
+  };
 
-    //first number after reset
-    if (typeof input == 'number' && currentInput == 'reset') {
-      setFirstNumber(input.toString());
+  const pressKey = (input: string | number) => {
+    if (typeof input == 'number') {
+      inputNum(input.toString(), prevInput);
+    } else if (checkOperator(input.toString())) {
+      inputOperator(input.toString(), prevInput);
+    } else {
+      inputUtil(input.toString(), prevInput);
     }
-
-    //del first input or after reset or equals
-    if (
-      input == 'del' &&
-      (currentInput == 'reset' || currentInput == '=' || !currentInput)
-    ) {
-      return;
-    }
-    //del on first number
-    if (input == 'del' && !operator) {
-      if (firstNumber.length < 2) {
-        setFirstNumber('0');
-      } else {
-        setFirstNumber((prevNumber) => prevNumber.slice(0, -1));
-      }
-    }
-
-    //del on second number
-    if (input == 'del' && operator) {
-      if (secondNumber.length < 2) {
-        setSecondNumber('0');
-      } else {
-        setSecondNumber((prevNumber) => prevNumber.slice(0, -1));
-      }
-    }
-
-    //first number after del
-    if (typeof input == 'number' && currentInput == 'del' && !operator) {
-      setFirstNumber((prevNumber) => (prevNumber += input));
-    }
-
-    //second number after del
-    if (typeof input == 'number' && currentInput == 'del' && operator) {
-      setSecondNumber((prevNumber) => (prevNumber += input));
-    }
+    setPrevInput(input.toString());
   };
   return (
     <div className='app-container'>
-      <h1>testing branch</h1>
       <main>
-        <Output
-          previousInput={previousInput}
-          currentInput={currentInput}
-          firstNumber={firstNumber}
-          secondNumber={secondNumber}
-          operator={operator}
-          result={result}
-        />
+        <Output calcs={calcs} />
         <Keypad pressKey={pressKey} />
       </main>
       <aside>
